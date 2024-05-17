@@ -1,5 +1,6 @@
 function config = Configs()
 
+weights.s = 10.0;
 weights.seepd = 10;
 weights.acc = 100;
 weights.jerk = 1000;

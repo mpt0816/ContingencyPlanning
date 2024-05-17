@@ -138,6 +138,7 @@ classdef Planner < handle
             solver.setup(P, q, A, l, u, settings);
             result = solver.solve();
         end
+        
         function settings = OsqpSettings(obj, solver)
             settings = solver.default_settings();
             settings.max_iter = 5000;
@@ -147,6 +148,16 @@ classdef Planner < handle
             settings.warm_start = false;
         end
         
+        function s = CalcaulateTarget(obj, index)
+            v = obj.init_state_.v;
+            if index <= obj.num_of_share_ + obj.num_of_nominal_
+                s = v * index * obj.config_.time.delta;
+                return
+            end
+            time = (index - obj.num_of_nominal_) * obj.config_.time.delta;
+            s = time * v;
+        end
+        
         function kernel = CalcaulateKernel(obj)
             %% state: s, v, a, control: j
             kernel_dim = 4 * obj.num_of_knots_;
@@ -154,16 +165,19 @@ classdef Planner < handle
             kernel.G = zeros(kernel_dim, 1);
             
             for i = 0 : 1 : obj.num_of_share_ - 1
+                kernel.H(4 * i + 1, 4 * i + 1) = obj.weights_.s;
                 kernel.H(4 * i + 2, 4 * i + 2) = obj.weights_.seepd;
                 kernel.H(4 * i + 4, 4 * i + 4) = obj.weights_.jerk;
             end
             
             for i = obj.num_of_share_ : 1 : obj.num_of_share_ + obj.num_of_nominal_ - 1
+                kernel.H(4 * i + 1, 4 * i + 1) = obj.p_nominal_ * obj.weights_.s;
                 kernel.H(4 * i + 2, 4 * i + 2) = obj.p_nominal_ * obj.weights_.seepd;
                 kernel.H(4 * i + 4, 4 * i + 4) = obj.p_nominal_ * obj.weights_.jerk;
             end
             
             for i = obj.num_of_share_ + obj.num_of_nominal_ : 1 : obj.num_of_share_ + obj.num_of_nominal_ + obj.num_of_contingency_ - 1
+                kernel.H(4 * i + 2, 4 * i + 2) = obj.p_contingency_ * obj.weights_.s;
                 kernel.H(4 * i + 2, 4 * i + 2) = obj.p_contingency_ * obj.weights_.seepd;
                 kernel.H(4 * i + 4, 4 * i + 4) = obj.p_contingency_ * obj.weights_.jerk;
             end
@@ -171,14 +185,17 @@ classdef Planner < handle
             target_speed = obj.init_state_.v;
             
             for i = 0 : 1 : obj.num_of_share_ - 1
+                kernel.G(4 * i + 1, 1) = -obj.weights_.s * obj.CalcaulateTarget(i);
                 kernel.G(4 * i + 2, 1) = -obj.weights_.seepd * target_speed;
             end
             
             for i = obj.num_of_share_ : 1 : obj.num_of_share_ + obj.num_of_nominal_ - 1
+                kernel.G(4 * i + 1, 1) = -obj.p_nominal_ * obj.weights_.s * obj.CalcaulateTarget(i);
                 kernel.G(4 * i + 2, 1) = -obj.p_nominal_ * obj.weights_.seepd * target_speed;
             end
             
             for i = obj.num_of_share_ + obj.num_of_nominal_ : 1 : obj.num_of_share_ + obj.num_of_nominal_ + obj.num_of_contingency_ - 1
+                kernel.G(4 * i + 1, 1) = -obj.p_contingency_ * obj.weights_.s * obj.CalcaulateTarget(i);
                 kernel.G(4 * i + 2, 1) = -obj.p_contingency_ * obj.weights_.seepd * target_speed;
             end
             

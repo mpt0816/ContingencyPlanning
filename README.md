@@ -1,5 +1,7 @@
 # Contingency Speed Planning
 
+简单实现。
+
 ## 1. Control Model
 
 - 状态变量：$x = [s, v, a]^T$;
@@ -22,9 +24,10 @@ $$
 
 - 优化函数：$J = J_{share} + P_n J_{n} + P_c J_{c}$
   $$
-  J_{share} = J_{n} = J_{c} = w_{j} j^2 + w_{v} (v-v_{ref})^2
+  J_{share} = J_{n} = J_{c} = w_{j} j^2 + w_{s} (s-s_{ref})^2 + w_{v} (v-v_{ref})^2
   $$
-
+将匀速行驶作为参考位置和速度。
+  
 - 约束条件：
 
   - 起点约束；
@@ -56,7 +59,14 @@ contingency planning优化求解；
 
 main.m
 
-![](result.png)
+- cut in概率为0：
 
+![](p_nominal=1.0.png)
 
+- cut in概率为0.1：
 
+![](p_nominal=0.9.png)
+
+- cut in概率为0.7：
+
+![](p_nominal=0.3.png)

@@ -1,0 +1,46 @@
+# ide/editor
+.vscode
+.idea
+*.swap
+*.slxc
+*.autosave
+slprj/
+*.mat
+*.asv
+
+# emacs
+**/.#*
+
+# build
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+Makefile
+build
+install_manifest.txt
+cmake-build-debug/
+**/CMakeCache.txt
+**/CMakeFiles
+**/cmake_install.cmake
+**/Makefile
+**/CMakeCache.txt
+**/CMakeFiles
+**/cmake_install.cmake
+**/Makefile
+**/install_manifest.txt
+**/venv
+**/catkin
+**/catkin_generated
+**/CTestTestfile.cmake
+**/devel
+**/gtest
+**/test_results
+**/xpnd_node
+**/xmake
+**/xclean
+
+# office
+*.~vsdx
+
+# figure
+./figure/*.png
